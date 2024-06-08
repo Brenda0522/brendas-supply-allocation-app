@@ -1,40 +1,57 @@
-import altair as alt
-import numpy as np
-import pandas as pd
 import streamlit as st
+import gurobipy as gp
+from gurobipy import GRB
 
-"""
-# Welcome to Streamlit!
+# User input
+w1, w2, w3 = 2, 3, 5
+k = 2
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+# Create a new model
+m = gp.Model()
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+# Create variables
+x1 = m.addVar(vtype = GRB.CONTINUOUS, name = "x1")
+x2 = m.addVar(vtype = GRB.CONTINUOUS, name = "x2")
+x3 = m.addVar(vtype = GRB.CONTINUOUS, name = "x3")
+x4 = m.addVar(vtype = GRB.CONTINUOUS, name = "x4")
+x5 = m.addVar(vtype = GRB.CONTINUOUS, name = "x5")
+x6 = m.addVar(vtype = GRB.CONTINUOUS, name = "x6")
+x7 = m.addVar(vtype = GRB.CONTINUOUS, name = "x7")
+x8 = m.addVar(vtype = GRB.CONTINUOUS, name = "x8")
+x9 = m.addVar(vtype = GRB.CONTINUOUS, name = "x9")
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+# Set objective
+m.setObjective(w1 * (20 - x1 - x7) + w2 * (20 - x2 - x8) + w3 * (30 - x3 - x9) + k * w1 * (10 - x1 - x4) + k * w2 * (10 - x2 - x5) + k * w3 * (15 - x3 - x6), GRB.MINIMIZE)
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+# Add constraints
+m.addConstr(x1 >= 0)
+m.addConstr(x2 >= 0)
+m.addConstr(x3 >= 0)
+m.addConstr(x4 >= 0)
+m.addConstr(x5 >= 0)
+m.addConstr(x6 >= 0)
+m.addConstr(x7 >= 0)
+m.addConstr(x8 >= 0)
+m.addConstr(x9 >= 0)
+m.addConstr(x1 <= 10)
+m.addConstr(x2 <= 10)
+m.addConstr(x3 <= 15)
+m.addConstr(x4 <= 10 - x1)
+m.addConstr(x5 <= 10 - x2)
+m.addConstr(x6 <= 15 - x3)
+m.addConstr(x7 <= 10)
+m.addConstr(x8 <= 5)
+m.addConstr(x9 <= 15)
+m.addConstr(x1 + x2 + x3 <= 25)
+m.addConstr(x4 + x5 + x6 + x7 + x8 + x9 <= 30)
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+# Optimize model
+m.optimize()
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
-
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+# Display results
+if m.status == GRB.Status.OPTIMAL:
+    for v in m.getVars():
+        print(f'{v.VarName} {v.X}')
+    print(f'Optimal Value: {m.ObjVal}')
+elif m.status == GRB.Status.INFEASIBLE:
+    print('The model is infeasible.')
