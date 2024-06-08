@@ -51,7 +51,7 @@ m.optimize()
 # Display results
 if m.status == GRB.Status.OPTIMAL:
     for v in m.getVars():
-        print(f'{v.VarName} {v.X}')
-    print(f'Optimal Value: {m.ObjVal}')
+        st.write(f'{v.VarName} {v.X}')
+    st.write(f'Optimal Value: {m.ObjVal}')
 elif m.status == GRB.Status.INFEASIBLE:
-    print('The model is infeasible.')
+    st.write('The model is infeasible.')
