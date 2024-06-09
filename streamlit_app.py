@@ -27,7 +27,8 @@ else:
     w4 = float(eu) / (amr + eu + pac) * resell
     w5 = float(pac) / (amr + eu + pac) * resell
 
-st.header('')
+st.write('')
+st.write('')
 
 st.write('Please choose importance multiplier if product is delayed for 2 weeks:')
 if st.checkbox('Separate multiplier for channels/customers'):
