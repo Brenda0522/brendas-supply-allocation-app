@@ -1,2 +1,4 @@
 gurobipy
 streamlit
+pandas
+numpy
